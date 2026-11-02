@@ -16,7 +16,8 @@ import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
 import com.example.notes_zakurin.R;
-import com.example.notes_zakurin.datas.RepoNotes;
+import com.example.notes_zakurin.datas.DbContext;
+import com.example.notes_zakurin.datas.NotesContext;
 import com.example.notes_zakurin.domains.models.Note;
 
 import java.util.ArrayList;
@@ -26,6 +27,8 @@ public class NotesActivity extends AppCompatActivity {
     GridLayout itemsParent;
     View btnAddNotes;
     EditText etSearch;
+    // Контекст базы данных
+    DbContext dbContext;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -39,13 +42,18 @@ public class NotesActivity extends AppCompatActivity {
             startActivity(intentActivityNote);
         });
         etSearch.setOnKeyListener(SearchListener);
-        LoadNotes(RepoNotes.Notes);
+
+        // Создаём экземпляр DbContext для работы с базой данных
+        dbContext = new DbContext(this);
+        // Загружаем все заметки из базы данных и отображаем их
+        LoadNotes(NotesContext.AllNotes());
     }
 
     @Override
     protected void onResume(){
         super.onResume();
-        LoadNotes(RepoNotes.Notes);
+        // Загружаем все заметки из базы данных и отображаем их
+        LoadNotes(NotesContext.AllNotes());
     }
 
     public void LoadNotes(ArrayList<Note> notes){
@@ -79,7 +87,8 @@ public class NotesActivity extends AppCompatActivity {
         public boolean onKey(View v, int keyCode, KeyEvent event) {
             String Search = etSearch.getText().toString();
 
-            ArrayList<Note> FindNotes = RepoNotes.Notes.stream().filter(
+            // Загружаем все заметки из базы данных и отображаем их
+            ArrayList<Note> FindNotes = NotesContext.AllNotes().stream().filter(
                     item -> item.text.contains(Search)
             ).collect(Collectors.toCollection(ArrayList::new));
 
