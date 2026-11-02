@@ -14,7 +14,7 @@ import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
 import com.example.notes_zakurin.R;
-import com.example.notes_zakurin.datas.RepoNotes;
+import com.example.notes_zakurin.datas.NotesContext;
 import com.example.notes_zakurin.domains.models.Note;
 
 import java.text.SimpleDateFormat;
@@ -47,7 +47,8 @@ public class NoteActivity extends AppCompatActivity {
         if (arguments != null) {
             int Position = arguments.getInt("position");
 
-            note = RepoNotes.Notes.get(Position);
+            // Получаем заметку из базы данных по позиции в списке
+            note = NotesContext.AllNotes().get(Position);
 
             etTitle.setText(note.title);
             etText.setText(note.text);
@@ -71,20 +72,23 @@ public class NoteActivity extends AppCompatActivity {
                     .isEmpty()){
                 Toast.makeText(this, "Нечего сохранять", Toast.LENGTH_SHORT).show();
             } else {
-                if(note == null) {
+                // Если заметка новая - создаём объект, иначе обновляем существующую
+                boolean Update = note != null;
+                if(note == null)
                     note = new Note();
-                    RepoNotes.Notes.add(note);
-                }
 
                 note.title = Title;
                 note.text = Text;
                 note.date = FormatForDateNow.format(DateNow);
+                // Сохраняем заметку в базе данных
+                NotesContext.Save(note, Update);
             }
             finish();
         });
 
         btnTrash.setOnClickListener(v -> {
-            RepoNotes.Notes.remove(note);
+            // Удаляем заметку из базы данных
+            NotesContext.Delete(note);
             finish();
             Toast.makeText(this, "Заметка удалена", Toast.LENGTH_SHORT).show();
         });
